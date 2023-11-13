@@ -89,8 +89,8 @@ param_struct* params = (param_struct*)malloc(sizeof(param_struct)*NUM_OF_THREADS
 params[0].id = 0; // id of first thread
 params[0].starting_row = 0;
 params[0].starting_col = 0;
-params[0].starting_row = 3;
-params[0].starting_row = 3;
+params[0].ending_row = 3;
+params[0].ending_col = 3;
 /* Now create the thread passing it params[0] as a parameter */
 pthread_create(&(tid[0]), &attr, validate, &(params[0]));
 ```
@@ -99,20 +99,20 @@ You will need to create an array, as illustrated above, to hold the parameters f
 
 ## Returning Results to the Parent Thread
 
-Each worker thread is assigned the task of determining the validity of a particular region of the Sudoku puzzle. Once a worker has performed this check, it must pass its results back to the parent. One good way to handle this is to create an array of integer values that is visible to each thread. An integer pointer called `worker_validation` is declared in **lab2.h** header file.  The i<sup>th</sup> index in this array corresponds to the i<sup>th</sup> worker thread. If a worker sets its corresponding value to 1, it indicates that its region of the Sudoku puzzle is valid. A value of 0 indicates otherwise. When all worker threads have completed, the parent thread checks each entry in the result array to determine if the Sudoku puzzle is valid.  That is the purpose of the `id` field in the param_struct.  This field provides the index into the array where the thread should deposit its result.
+Each worker thread is assigned the task of determining the validity of a particular region of the Sudoku puzzle. Once a worker has performed this check, it must pass its results back to the parent. One good way to handle this is to create an array of integer values that is visible to each thread. An integer pointer called `worker_validation` is declared in **lab3.h** header file.  The i<sup>th</sup> index in this array corresponds to the i<sup>th</sup> worker thread. If a worker sets its corresponding value to 1, it indicates that its region of the Sudoku puzzle is valid. A value of 0 indicates otherwise. When all worker threads have completed, the parent thread checks each entry in the result array to determine if the Sudoku puzzle is valid.  That is the purpose of the `id` field in the param_struct.  This field provides the index into the array where the thread should deposit its result.
 
 ## Lab Structure
 
 The project contains the following files.
 
-1. <strong><u>lab2.h</u></strong> - header file that has all the #define macros, typedefs, the global variables for the sudoko board and the worker validation array.
-2. <strong><u>lab2.c</u></strong> - where all implementation must take place.
-3. <strong><u>main.c</u></strong> - entry point to program that reads sudoku board from file and calls is_sudoku_valid() function that must be implemented in **lab2.c**.
+1. <strong><u>lab3.h</u></strong> - header file that has all the #define macros, typedefs, the global variables for the sudoko board and the worker validation array.
+2. <strong><u>lab3.c</u></strong> - where all implementation must take place.
+3. <strong><u>main.c</u></strong> - entry point to program that reads sudoku board from file and calls is_sudoku_valid() function that must be implemented in **lab3.c**.
 3. <strong><u>makefile</u></strong> - compiles and creates executable called **validate_sudoku**.
 4. <strong><u>valid_board.txt</u></strong> - valid board for testing.
 5.  <strong><u>invalid_board.txt</u></strong> - invalid board for testing.
 
-You are welcome to create your own **lab1.h** file and use your own typedef defintions.   You are also welcome to add any function you want in **lab2.c**.  The only requirement is that you have an implementation of,
+You are welcome to create your own **lab3.h** file and use your own typedef defintions.   You are also welcome to add any function you want in **lab3.c**.  The only requirement is that you have an implementation of,
 
 * ```int** read_board_from_file(char* filename);``` - returns a 2-dimensional integer array representing the board read from file.
 * ```int is_board_valid();``` - returns a 1 if the board is valid; otherwise a 0
