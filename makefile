@@ -4,7 +4,7 @@ validate_sudoku: $(OBJECTS)
 	gcc -o $@ $(OBJECTS) 
 
 lab3.o:lab3.c
-	gcc -c lab2.c
+	gcc -c lab3.c
 
 main.o: 
 	gcc -c main.c
