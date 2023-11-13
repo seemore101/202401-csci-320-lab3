@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <stdlib.h>
-#include "lab2.h"
+#include "lab3.h"
 
 
 int** read_board_from_file(char* filename){

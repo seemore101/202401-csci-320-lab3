@@ -1,4 +1,4 @@
-# Programming Lab 2 - Sudoku Solution Validator
+# Programming Lab 3 - Sudoku Solution Validator
 
 ## Learning Outcomes
 
@@ -79,7 +79,7 @@ typedef struct
    int ending_col;
 } param_struct;
 ```
-This structure is provided in the lab2.h header file.
+This structure is provided in the lab3.h header file.
 
 A program will create worker threads using a strategy similar to that shown below:
 

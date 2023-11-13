@@ -1,9 +1,9 @@
-OBJECTS = lab2.o main.o
+OBJECTS = lab3.o main.o
 
 validate_sudoku: $(OBJECTS)
 	gcc -o $@ $(OBJECTS) 
 
-lab2.o:lab2.c
+lab3.o:lab3.c
 	gcc -c lab2.c
 
 main.o: 
