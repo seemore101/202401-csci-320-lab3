@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include "lab3.h"
 
+extern int** sudoku_board;
+int* worker_validation;
 
 int** read_board_from_file(char* filename){
     FILE *fp = NULL;

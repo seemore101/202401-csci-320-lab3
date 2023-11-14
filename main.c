@@ -2,8 +2,9 @@
 #include <stdlib.h>
 #include "lab3.h"
 
+int** sudoku_board;
+
 int main(int argc, char *argv[]){
-    
     
     if (argc < 2){
         fprintf(stderr,"SYNOPSIS: %s <file name>\n",argv[0]);
