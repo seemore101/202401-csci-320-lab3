@@ -8,33 +8,24 @@ int* worker_validation;
 
 int** read_board_from_file(char* filename){
     FILE *fp = NULL;
- if (fp == NULL) {
+    int** board = NULL;
+
+      FILE *fp = fopen(filename, "r");
+    int** board = (int**)malloc(ROW_SIZE * sizeof(int*));
+
+    for(int i = 0; i < COL_SIZE; i++)
+        board[i] = (int*) malloc(COL_SIZE * sizeof(int));
+
+    if(fp == NULL) {
         perror("Error opening file");
         exit(EXIT_FAILURE);
     }
 
-    board = (int**)malloc(sizeof(int*) * ROW_SIZE);
-    if (board == NULL) {
-        perror("Error allocating memory for rows");
-        exit(EXIT_FAILURE);
-    }
-
-    for (int i = 0; i < ROW_SIZE; i++) {
-        board[i] = (int*)malloc(sizeof(int) * COL_SIZE);
-        if (board[i] == NULL) {
-            perror("Error allocating memory for columns");
-            exit(EXIT_FAILURE);
-        }
-
-        for (int j = 0; j < COL_SIZE; j++) {
-            if (fscanf(fp, "%d,", &board[i][j]) != 1) {
-                perror("Error reading from file");
-                exit(EXIT_FAILURE);
-            }
-        }
-    }
-
+    for(int r = 0; r < ROW_SIZE; r++)
+        for(int c = 0; c < COL_SIZE; c++)
+            fscanf(fp, "%d", &board[r][c]);
     fclose(fp);
+
     return board;
 }
 
