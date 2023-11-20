@@ -7,81 +7,142 @@ extern int** sudoku_board;
 int* worker_validation;
 
 int** read_board_from_file(char* filename){
-    FILE *fp = NULL;
+    FILE *fp = fopen(filename, "r");
+    if (!fp) {
+        perror("fopen");
+        exit(EXIT_FAILURE);
+    }
+    
     int** board = NULL;
 
-      FILE *fp = fopen(filename, "r");
-    int** board = (int**)malloc(ROW_SIZE * sizeof(int*));
-
-    for(int i = 0; i < COL_SIZE; i++)
-        board[i] = (int*) malloc(COL_SIZE * sizeof(int));
-
-    if(fp == NULL) {
-        perror("Error opening file");
-        exit(EXIT_FAILURE);
+    sudoku_board = (int**)malloc(sizeof(int*) * ROW_SIZE);
+    for (int row = 0; row < ROW_SIZE; row++) {
+        sudoku_board[row] = (int*)malloc(sizeof(int) * COL_SIZE);
     }
 
-    for(int r = 0; r < ROW_SIZE; r++)
-        for(int c = 0; c < COL_SIZE; c++)
-            fscanf(fp, "%d", &board[r][c]);
-    fclose(fp);
+    for (int i = 0; i < ROW_SIZE * COL_SIZE; i++) {
+        fscanf(fp, "%d,", &sudoku_board[i / 9][i % 9]);
+    }
 
-    return board;
+    return sudoku_board;
 }
 
-int is_board_valid(){
-    pthread_t* tid;  /* the thread identifiers */
-    pthread_attr_t attr;
-    param_struct* parameter;
-    
-    tid = (pthread_t*)malloc(sizeof(pthread_t) * NUM_OF_THREADS);
-    if (tid == NULL) {
-        perror("Error allocating memory for thread identifiers");
-        exit(EXIT_FAILURE);
+void* checkRow(void* param) {
+    param_struct* arg = (param_struct*)param;
+    int row = arg->starting_row;
+    int inArr[9] = {0, 0, 0, 0, 0, 0, 0};
+    for (int x = 0; x < 9; x++) {
+        if (sudoku_board[row][x] < 10 && sudoku_board[row][x] > 0) {
+            inArr[sudoku_board[row][x] - 1] += 1;
+            if (inArr[sudoku_board[row][x] - 1] > 1) {
+                worker_validation = (int*)0;
+                return NULL;
+            }
+        } else {
+            worker_validation = (int*)0;
+            return NULL;
+        }
     }
-
-    params = (param_struct*)malloc(sizeof(param_struct) * NUM_OF_THREADS);
-    if (params == NULL) {
-        perror("Error allocating memory for thread parameters");
-        exit(EXIT_FAILURE);
+    for (int z = 0; z < 9; z++) {
+        if (inArr[z] != 1) {
+            worker_validation = (int*)0;
+            return NULL;
+        }
     }
+    worker_validation = (int*)1;
+    return NULL;
+}
 
-    pthread_attr_init(&attr);
-
-    for (int i = 0; i < NUM_OF_THREADS; i++) {
-        params[i].id = i;
-        params[i].starting_row = i * (ROW_SIZE / NUM_OF_THREADS);
-        params[i].starting_col = 0;
-        params[i].ending_row = (i + 1) * (ROW_SIZE / NUM_OF_THREADS);
-        params[i].ending_col = COL_SIZE;
-
-        pthread_create(&tid[i], &attr, validate, &(params[i]));
-    }
-
-    for (int i = 0; i < NUM_OF_THREADS; i++) {
-        pthread_join(tid[i], NULL);
-    }
-
-    for (int i = 0; i < NUM_OF_THREADS; i++) {
-        if (worker_validation[i] == 0) {
-            free(tid);
-            free(params);
-            pthread_attr_destroy(&attr);
-            return 0;
+void* checkCol(void* param) {
+    param_struct* arg = (param_struct*)param;
+    int index = arg->starting_col;
+    int inArr[9] = {0, 0, 0, 0, 0, 0, 0};
+    for (int x = 0; x < 9; x++) {
+        if (sudoku_board[x][index] < 10 && sudoku_board[x][index] > 0) {
+            inArr[sudoku_board[x][index] - 1]++;
+            if (inArr[sudoku_board[x][index] - 1] > 1) {
+                worker_validation = (int*)0;
+                return NULL;
+            }
+        } else {
+            worker_validation = (int*)0;
+            return NULL;
         }
     }
 
-    free(tid);
-    free(params);
-    pthread_attr_destroy(&attr);
-
-    return 1; 
+    for (int z = 0; z < 9; z++) {
+        if (inArr[z] != 1) {
+            worker_validation = (int*)0;
+            return NULL;
+        }
+    }
+    worker_validation = (int*)1;
+    return NULL;
 }
 
-void* validate(void* param) {
-    param_struct* params = (param_struct*)param;
-
-    worker_validation[params->id] = 1;
-
+void* checkSquare(void* param) {
+    param_struct* arg = (param_struct*)param;
+    int maxRow = arg->ending_row;
+    int maxCol = arg->ending_col;
+    int inArr[9] = {0, 0, 0, 0, 0, 0, 0};
+    for (int x = maxCol - 3; x < maxCol && x >= maxCol - 3; x++) {
+        for (int y = maxRow - 3; y < maxRow && y >= maxRow - 3; y++) {
+            if (sudoku_board[x][y] < 10 && sudoku_board[x][y] > 0) {
+                inArr[sudoku_board[x][y] - 1]++;
+                if (inArr[sudoku_board[x][y] - 1] > 1) {
+                    worker_validation = (int*)0;
+                    return NULL;
+                }
+            } else {
+                worker_validation = (int*)0;
+                return NULL;
+            }
+        }
+    }
+    
+    for (int z = 0; z < 9; z++) {
+        if (inArr[z] != 1) {
+            worker_validation = (int*)0;
+            return NULL;
+        }
+    }
+    worker_validation = (int*)1;
     return NULL;
+}
+
+int is_board_valid() {
+    pthread_t tid;  /* the thread identifiers */
+    pthread_attr_t attr;
+    param_struct* parameter;
+    
+    param_struct* params = (param_struct*)malloc(sizeof(param_struct) * 27);
+    for (int i = 0; i < 9; i++) {
+        params[i].starting_row = i;
+        params[i].starting_col = i;
+        pthread_create(&tid, NULL, checkRow, &(params[i]));
+        pthread_join(tid, NULL);
+        if (worker_validation == (int*)1) {
+        } else {
+            return 0;
+        }
+        pthread_create(&tid, NULL, checkCol, &(params[i]));
+        pthread_join(tid, NULL);
+        if (worker_validation == (int*)1) {
+        } else {
+            return 0;
+        }
+    }
+    for (int a = 2; a < 9 && a >= 2; a += 3) {
+        for (int b = 2; b < 9 && b >= 2; b += 3) {
+            params[0].ending_row = a + 1;
+            params[0].ending_col = b + 1;
+            pthread_create(&tid, NULL, checkSquare, &(params[0]));
+            pthread_join(tid, NULL);
+            if (worker_validation == (int*)1) {
+            } else {
+                return 0;
+            }
+        }
+    }
+    return 1;
 }
