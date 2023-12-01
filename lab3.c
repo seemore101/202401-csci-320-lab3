@@ -118,7 +118,7 @@ void* check_square(void* param) {
 }
 
 int is_board_valid() {
-    pthread_t tid; /* the thread identifiers */
+    pthread_t tid;
     pthread_attr_t attr;
     param_struct* parameter;
 
